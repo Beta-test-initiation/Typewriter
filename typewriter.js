@@ -10,6 +10,61 @@
 (function () {
   'use strict';
 
+  // ─── email config (values come from config.js, which is gitignored) ──
+  const _cfg              = window.TYPEWRITER_CONFIG || {};
+  const EMAILJS_PUBLIC_KEY  = _cfg.EMAILJS_PUBLIC_KEY  || '';
+  const EMAILJS_SERVICE_ID  = _cfg.EMAILJS_SERVICE_ID  || '';
+  const EMAILJS_TEMPLATE_ID = _cfg.EMAILJS_TEMPLATE_ID || '';
+  const SITE_URL            = _cfg.SITE_URL            || '';
+
+  const EMAILJS_READY = (
+    typeof emailjs !== 'undefined' &&
+    EMAILJS_PUBLIC_KEY !== '' &&
+    EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
+  );
+  if (EMAILJS_READY) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  // ─── build a beautiful HTML letter email ──────────────────
+  function buildHtmlEmail(name, text, from, dateStr) {
+    const esc = (s) => String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const bodyHtml = esc(text).replace(/\n/g, '<br>');
+    const fromRow  = from
+      ? `<tr><td style="padding:0 48px 24px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#2a1f17;">&#x2014;&nbsp;${esc(from)}</td></tr>`
+      : '';
+    const promoUrl     = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL') ? SITE_URL : '#';
+    const promoDisplay = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL')
+      ? SITE_URL.replace(/^https?:\/\//, '')
+      : 'underwood — a typewriter';
+    const promoRow = `<tr><td style="padding:10px 48px 24px;border-top:1px solid rgba(100,70,30,0.1);text-align:center;">
+           <p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:10px;color:rgba(80,55,20,0.4);letter-spacing:0.05em;">
+             write your own letter at
+             <a href="${promoUrl}" style="color:#7a5a2a;text-decoration:none;">${promoDisplay}</a>
+           </p></td></tr>`;
+
+    return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#ede4c8;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ede4c8;padding:40px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fbf3df;border:1px solid #d8cc9e;max-width:600px;box-shadow:0 4px 28px rgba(0,0,0,0.12);">
+  <tr><td style="padding:36px 48px 16px;border-bottom:1px solid rgba(100,70,30,0.18);">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-family:Georgia,serif;font-style:italic;color:#7a5a2a;font-size:14px;">${esc(dateStr)}</td>
+      <td align="right" style="font-family:Georgia,serif;font-style:italic;color:rgba(80,55,20,0.4);font-size:12px;letter-spacing:0.18em;">~ Underwood ~</td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="padding:32px 48px 8px;font-family:'Courier New',Courier,monospace;font-size:14px;line-height:1.9;color:#2a1f17;">${bodyHtml}</td></tr>
+  ${fromRow}
+  <tr><td style="padding:12px 48px 20px;border-top:1px solid rgba(100,70,30,0.15);">
+    <p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:11px;color:rgba(80,55,20,0.5);text-align:right;">&#x2014;&nbsp;typed on a typewriter</p>
+  </td></tr>
+  ${promoRow}
+</table>
+</td></tr></table>
+</body></html>`;
+  }
+
   // ─── fit scene to viewport ────────────────────────────────
   const DESIGN_W = 1280, DESIGN_H = 820;
   const sceneInner = document.getElementById('sceneInner');
@@ -28,7 +83,6 @@
   const paperText  = document.getElementById('paperText');
   const paperStage = document.getElementById('paperStage');
   const carriage   = document.getElementById('carriage');
-  const bellFlash  = document.getElementById('bellFlash');
   const soundPill  = document.getElementById('soundPill');
   const spLabel    = document.getElementById('spLabel');
   const spIcon     = document.getElementById('spIcon');
@@ -121,25 +175,6 @@
     src.start(now); src.stop(now + 0.1);
   }
 
-  function bellDing() {
-    if (!soundOn) return;
-    const ctx = ensureAudio();
-    const now = ctx.currentTime;
-    [1864, 2790, 3920].forEach((freq, i) => {
-      const o = ctx.createOscillator();
-      o.type = 'sine';
-      o.frequency.value = freq;
-      const g = ctx.createGain();
-      const amp = 0.18 / (i + 1);
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(amp, now + 0.005);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-      o.connect(g).connect(ctx.destination);
-      o.start(now);
-      o.stop(now + 1.05);
-    });
-  }
-
   function carriageReturn() {
     if (!soundOn) return;
     const ctx = ensureAudio();
@@ -163,13 +198,9 @@
 
   // ─── paper text model ─────────────────────────────────────
   // store as array of "lines" of chars; current line is last.
-  // line wrap: each visible line capped at COLS chars before bell+wrap.
-
   const COLS = 38;            // characters per line on the paper
-  const BELL_AT = 32;         // ring bell when nearing margin
 
   let lines = [['']];         // start with one empty line
-  let lastBellLine = -1;
 
   function currentLine() { return lines[lines.length - 1]; }
 
@@ -236,15 +267,7 @@
     }
     line.push(ch);
 
-    // bell when nearing margin
-    if (line.length === BELL_AT && lastBellLine !== lines.length - 1) {
-      lastBellLine = lines.length - 1;
-      bellDing();
-      bellFlash.classList.remove('ring');
-      void bellFlash.offsetWidth;
-      bellFlash.textContent = '— ding —';
-      bellFlash.classList.add('ring');
-    }
+    // bell disabled
 
     paperStage.classList.remove('kick');
     void paperStage.offsetWidth;
@@ -287,6 +310,13 @@
   // chars we consider "printable" for the paper text
   const PRINTABLE_RE = /^[\x20-\x7E\u00A0-\u00FF\u2010-\u2027]$/;
 
+  function clearSeedIfNeeded() {
+    if (!seeded) return;
+    seeded = false;
+    lines = [[]];
+    render();
+  }
+
   window.addEventListener('keydown', (e) => {
     // don't swallow keys when user has focused the tweaks panel input
     const t = e.target;
@@ -306,30 +336,34 @@
 
     if (key === 'Backspace') {
       e.preventDefault();
+      clearSeedIfNeeded();
       clack(0.9);
       backspace();
       return;
     }
     if (key === 'Enter') {
       e.preventDefault();
+      clearSeedIfNeeded();
       lineFeed();
       return;
     }
     if (key === 'Tab') {
       e.preventDefault();
-      // tab = 4 spaces
+      clearSeedIfNeeded();
       for (let i = 0; i < 4; i++) appendChar(' ');
       spaceWhoosh();
       return;
     }
     if (key === ' ') {
       e.preventDefault();
+      clearSeedIfNeeded();
       spaceWhoosh();
       appendChar(' ');
       return;
     }
     if (key.length === 1 && PRINTABLE_RE.test(key)) {
       e.preventDefault();
+      clearSeedIfNeeded();
       clack(1);
       appendChar(key);
       return;
@@ -342,11 +376,12 @@
       const k = el.getAttribute('data-key');
       if (!k) return;
       pressKeyVisual(el);
-      if (k === 'Backspace') { clack(0.9); backspace(); return; }
-      if (k === 'Enter') { lineFeed(); return; }
-      if (k === 'Tab') { for (let i = 0; i < 4; i++) appendChar(' '); spaceWhoosh(); return; }
+      if (k === 'Backspace') { clearSeedIfNeeded(); clack(0.9); backspace(); return; }
+      if (k === 'Enter') { clearSeedIfNeeded(); lineFeed(); return; }
+      if (k === 'Tab') { clearSeedIfNeeded(); for (let i = 0; i < 4; i++) appendChar(' '); spaceWhoosh(); return; }
       if (k === 'Shift' || k === 'ShiftR') { return; }
       if (k.length === 1) {
+        clearSeedIfNeeded();
         clack(1);
         appendChar(k);
       }
@@ -356,6 +391,7 @@
     const el = document.querySelector('.space-bar');
     el.classList.add('pressed');
     setTimeout(() => el.classList.remove('pressed'), 110);
+    clearSeedIfNeeded();
     spaceWhoosh();
     appendChar(' ');
   });
@@ -385,6 +421,7 @@
     render();
   }
   seed();
+  let seeded = true; // paper has seed text; first real keypress clears it
 
   // ─── trinket drag-to-reposition ───────────────────────────
   // Each trinket carries CSS vars --tx/--ty that compose with its base rotate.
@@ -530,28 +567,20 @@
       return;
     }
 
-    // remember sender
     try {
       localStorage.setItem(ENV_STORE, JSON.stringify({ from: envFrom.value.trim() }));
     } catch (e) {}
 
-    const text = window.__typewriter.getLetterText() || '';
-    const to   = envEmail.value.trim();
-    const name = envName.value.trim();
-    const from = envFrom.value.trim();
-    const subject = name
-      ? `A letter for ${name}`
-      : 'A letter from my typewriter';
-    const body =
-      (name ? `Dear ${name},\n\n` : '') +
-      text +
-      (from ? `\n\n— ${from}` : '') +
-      `\n\n(typed on my typewriter)`;
+    const text    = window.__typewriter.getLetterText() || '';
+    const to      = envEmail.value.trim();
+    const toName  = envName.value.trim();
+    const from    = envFrom.value.trim();
 
-    const mailtoUrl =
-      `mailto:${encodeURIComponent(to)}` +
-      `?subject=${encodeURIComponent(subject)}` +
-      `&body=${encodeURIComponent(body)}`;
+    const months  = ['January','February','March','April','May','June','July',
+                     'August','September','October','November','December'];
+    const d       = new Date();
+    const dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    const subject = toName ? `A letter for ${toName}` : 'A letter from my typewriter';
 
     // sound: wax drop + soft thud
     if (soundOn) {
@@ -569,40 +598,60 @@
     }
 
     // sequence:
-    //   T+0   : wax seal stamps down (520ms)
-    //   T+460 : top flap closes over the wax (720ms)
-    //   T+900 : envelope flies away (1100ms)
-    //   T+1500: open mailto link
-    //   T+2200: close overlay, show toast
+    //   T+0   : wax seal stamps down
+    //   T+460 : top flap closes
+    //   T+900 : envelope flies — fire the send here
+    //   T+2200: close overlay, show result toast
+
+    let sendPromise = null;
 
     envelope.classList.add('sealing');
-
-    setTimeout(() => {
-      envelope.classList.add('sealed');
-    }, 460);
+    setTimeout(() => { envelope.classList.add('sealed'); }, 460);
 
     setTimeout(() => {
       envOverlay.classList.add('posting');
       envelope.classList.add('flying');
+
+      if (EMAILJS_READY) {
+        sendPromise = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email:     to,
+          to_name:      toName || 'friend',
+          from_name:    from   || 'a friend with a typewriter',
+          subject:      subject,
+          message_html: buildHtmlEmail(toName, text, from, dateStr),
+        });
+      } else {
+        // EmailJS not configured — fall back to mailto
+        const plainBody =
+          (toName ? `Dear ${toName},\n\n` : '') +
+          text +
+          (from ? `\n\n— ${from}` : '') +
+          '\n\n(typed on a typewriter)';
+        const mailtoUrl =
+          `mailto:${encodeURIComponent(to)}` +
+          `?subject=${encodeURIComponent(subject)}` +
+          `&body=${encodeURIComponent(plainBody)}`;
+        sendPromise = new Promise((resolve) => {
+          try { const w = window.open(mailtoUrl, '_blank'); if (!w) window.location.href = mailtoUrl; }
+          catch (e) { window.location.href = mailtoUrl; }
+          resolve();
+        });
+      }
     }, 900);
 
     setTimeout(() => {
-      try {
-        const w = window.open(mailtoUrl, '_blank');
-        if (!w) window.location.href = mailtoUrl;
-      } catch (e) {
-        window.location.href = mailtoUrl;
-      }
-    }, 1500);
-
-    setTimeout(() => {
       closeEnvelope();
-      // reset for next time
       envelope.classList.remove('sealing', 'sealed', 'flying');
       envName.value = '';
       envEmail.value = '';
       updateSendDisabled();
-      showToast(`posted to ${to} ✉`);
+      if (sendPromise) {
+        sendPromise
+          .then(() => showToast(`posted to ${to} ✉`))
+          .catch(() => showToast('could not send — please try again'));
+      } else {
+        showToast(`posted to ${to} ✉`);
+      }
     }, 2200);
   }
 
@@ -631,7 +680,15 @@
   let lmHideTimer = 0;
   function showLm() {
     clearTimeout(lmHideTimer);
-    if (!lettersMenu) return;
+    if (!lettersMenu || !lettersTrinket) return;
+
+    // Position the menu below wherever the trinket currently is,
+    // converting from screen coords into scene-inner's coordinate space.
+    const tr = lettersTrinket.getBoundingClientRect();
+    const sr = sceneInner.getBoundingClientRect();
+    lettersMenu.style.left = ((tr.left + tr.width / 2 - sr.left) / currentScale) + 'px';
+    lettersMenu.style.top  = ((tr.bottom - sr.top) / currentScale + 10) + 'px';
+
     lettersMenu.classList.add('show');
     lettersMenu.setAttribute('aria-hidden', 'false');
   }

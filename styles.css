@@ -47,11 +47,7 @@ html, body {
 }
 
 body {
-  background:
-    radial-gradient(ellipse 1100px 700px at 50% 55%,
-      var(--bg-2) 0%,
-      var(--bg-1) 55%,
-      var(--bg-edge) 130%);
+  background: var(--bg-2);
   font-family: 'Special Elite', 'Courier Prime', 'Courier New', monospace;
   color: var(--ink);
   position: relative;
@@ -61,25 +57,10 @@ body {
 body::before {
   content: "";
   position: fixed; inset: 0;
-  background-image:
-    radial-gradient(circle at 23% 14%, rgba(0,0,0,0.05) 0, transparent 18%),
-    radial-gradient(circle at 81% 24%, rgba(255,245,220,0.18) 0, transparent 22%),
-    radial-gradient(circle at 14% 82%, rgba(0,0,0,0.05) 0, transparent 20%),
-    radial-gradient(circle at 88% 78%, rgba(0,0,0,0.06) 0, transparent 22%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* desk grain noise */
-body::after {
-  content: "";
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.10  0 0 0 0 0.05  0 0 0 0.7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
-  opacity: 0.35;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  z-index: 1;
-}
 
 /* ============================================================
    scene scaler — design canvas fits the viewport
@@ -110,7 +91,8 @@ body::after {
   position: absolute;
   left: 50%;
   bottom: 24px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(0.9);
+  transform-origin: bottom center;
   width: 760px;
   height: 432px;
   filter: drop-shadow(0 28px 24px rgba(40, 20, 10, 0.35))
@@ -544,8 +526,9 @@ body::after {
 .paper-stage {
   position: absolute;
   left: 50%;
-  bottom: 432px;        /* sit above the platen */
-  transform: translateX(-50%);
+  bottom: 389px;        /* sit above the platen (432 * 0.9) */
+  transform: translateX(-50%) scale(0.9);
+  transform-origin: bottom center;
   width: 460px;
   height: 440px;
   z-index: 15;
@@ -605,8 +588,8 @@ body::after {
 
 .paper-text {
   font-family: 'Special Elite', 'Courier Prime', monospace;
-  font-size: 16px;
-  line-height: 26px;
+  font-size: 14px;
+  line-height: 24px;
   letter-spacing: 0.02em;
   color: var(--ink);
   white-space: pre-wrap;
@@ -628,9 +611,9 @@ body::after {
   animation: paper-kick 100ms ease-out;
 }
 @keyframes paper-kick {
-  0%   { transform: translateX(-50%); }
-  40%  { transform: translateX(calc(-50% - 1.5px)) translateY(1px); }
-  100% { transform: translateX(-50%); }
+  0%   { transform: translateX(-50%) scale(0.9); }
+  40%  { transform: translateX(calc(-50% - 1.5px)) translateY(1px) scale(0.9); }
+  100% { transform: translateX(-50%) scale(0.9); }
 }
 
 /* line-feed bump (Enter key) */
@@ -638,9 +621,9 @@ body::after {
   animation: paper-feed 280ms cubic-bezier(.2,.8,.3,1);
 }
 @keyframes paper-feed {
-  0%   { transform: translateX(-50%) translateY(0); }
-  35%  { transform: translateX(-50%) translateY(-3px); }
-  100% { transform: translateX(-50%) translateY(0); }
+  0%   { transform: translateX(-50%) translateY(0) scale(0.9); }
+  35%  { transform: translateX(-50%) translateY(-3px) scale(0.9); }
+  100% { transform: translateX(-50%) translateY(0) scale(0.9); }
 }
 
 /* ============================================================
@@ -684,31 +667,11 @@ body::after {
   transform: rotate(-6deg) translate(-8px, 28px);
 }
 
-/* books: gentle fan-out on hover */
-.book {
-  transition: transform 380ms cubic-bezier(.2,.8,.3,1.2);
-}
-.trinket-books:hover:not(.dragging) .book-1 { transform: rotate(-6deg) translate(-4px, -4px); }
-.trinket-books:hover:not(.dragging) .book-2 { transform: rotate(4deg)  translate(6px,  -2px); }
-.trinket-books:hover:not(.dragging) .book-3 { transform: rotate(-3deg) translate(-3px, 0px); }
-.trinket-books:hover:not(.dragging) .book-4 { transform: rotate(3deg)  translate(3px,  2px); }
-
-/* vinyl: disc spins on hover */
-.vinyl-disc { transition: transform 200ms; }
-@keyframes vinyl-spin { to { transform: rotate(360deg); } }
-.trinket-vinyl:hover:not(.dragging) .vinyl-disc {
-  animation: vinyl-spin 3.2s linear infinite;
-  transform-origin: 50% 50%;
-}
 
 /* ─── scene back-plane (needed for layered shadows) ───────── */
 
 .scene-inner {
-  background:
-    radial-gradient(ellipse 1100px 700px at 50% 55%,
-      var(--bg-2) 0%,
-      var(--bg-1) 55%,
-      var(--bg-edge) 130%);
+  background: var(--bg-2);
   isolation: isolate;
 }
 
@@ -787,216 +750,6 @@ body::after {
   text-shadow: 0 1px 0 rgba(0,0,0,0.4);
 }
 
-/* ─── stack of books (horizontal, lying flat) ─────────────── */
-
-.trinket-books {
-  right: 50px; bottom: 60px;
-  width: 200px; height: 230px;
-  transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(3deg) scale(0.7);
-  z-index: 9;
-}
-.book {
-  position: absolute;
-  left: 0; right: 0;
-  border-radius: 2px 3px 3px 2px;
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,0.15),
-    inset 0 -2px 4px rgba(0,0,0,0.2),
-    0 2px 4px rgba(0,0,0,0.18);
-  display: grid;
-  place-items: center;
-  overflow: visible;
-}
-.book-1 { /* top — burgundy */
-  bottom: 152px; height: 36px;
-  width: 86%; left: 7%;
-  background: linear-gradient(180deg, #8a3848 0%, #5e1f2c 100%);
-  transform: rotate(-3deg);
-  z-index: 4;
-}
-.book-2 { /* second — rose */
-  bottom: 102px; height: 40px;
-  width: 100%; left: 0;
-  background: linear-gradient(180deg, #d9a8b0 0%, #b07c88 100%);
-  transform: rotate(2deg);
-  z-index: 3;
-}
-.book-3 { /* third — sage */
-  bottom: 48px; height: 44px;
-  width: 96%; left: 2%;
-  background: linear-gradient(180deg, #9ba88a 0%, #6c7b5b 100%);
-  transform: rotate(-1deg);
-  z-index: 2;
-}
-.book-4 { /* bottom — dusty teal */
-  bottom: 0; height: 44px;
-  width: 90%; left: 5%;
-  background: linear-gradient(180deg, #a6c0bf 0%, #6e8e8e 100%);
-  transform: rotate(1deg);
-  z-index: 1;
-}
-.book-band {
-  position: absolute;
-  left: 0; right: 0;
-  top: 50%;
-  height: 18px;
-  margin-top: -9px;
-  background: linear-gradient(180deg,
-    rgba(245,236,208,0.92) 0%,
-    rgba(232,220,180,0.92) 100%);
-  border-top: 1px solid rgba(60, 40, 22, 0.18);
-  border-bottom: 1px solid rgba(60, 40, 22, 0.18);
-}
-.book-spine-title {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: #2a1815;
-  white-space: nowrap;
-  z-index: 2;
-}
-.book-pages-side {
-  position: absolute;
-  right: -3px; top: 3px; bottom: 3px;
-  width: 5px;
-  background: repeating-linear-gradient(180deg,
-    #f4ead0 0 1.2px,
-    #c4ae74 1.2px 2.4px);
-  border-radius: 0 2px 2px 0;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
-}
-.book-floret {
-  position: absolute;
-  right: 10px; top: 50%;
-  transform: translateY(-50%);
-  width: 8px; height: 8px;
-  background: radial-gradient(circle at 30% 30%, #e8c98a, #8a6a2a);
-  border-radius: 50%;
-  z-index: 3;
-}
-
-/* ─── vinyl record + sleeve ───────────────────────────────── */
-
-.trinket-vinyl {
-  left: 30px; bottom: 40px;
-  width: 320px; height: 260px;
-  transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(-9deg);
-  z-index: 8;
-}
-.vinyl-sleeve {
-  position: absolute;
-  left: 0; top: 20px;
-  width: 230px; height: 230px;
-  background:
-    linear-gradient(140deg, #3d2818 0%, #2a1d10 60%, #1a1106 100%);
-  border-radius: 3px;
-  box-shadow:
-    0 6px 12px rgba(0,0,0,0.32),
-    inset 0 0 0 1px rgba(255,210,160,0.06);
-  overflow: hidden;
-}
-.vinyl-sleeve-art {
-  position: absolute;
-  inset: 20px 20px 60px 20px;
-  background:
-    radial-gradient(circle at 50% 50%, #d4a04a 0%, #a8782a 30%, transparent 31%),
-    radial-gradient(circle at 50% 50%, transparent 28%, #4a3220 29%, #4a3220 38%, transparent 39%);
-  border: 1px solid rgba(255,210,160,0.16);
-  border-radius: 2px;
-}
-.vinyl-sleeve-band {
-  position: absolute;
-  left: 14px; right: 14px;
-  bottom: 38px; height: 1px;
-  background: rgba(255,210,160,0.45);
-  box-shadow: 0 -3px 0 rgba(255,210,160,0.2);
-}
-.vinyl-sleeve-title {
-  position: absolute;
-  left: 0; right: 0;
-  bottom: 10px;
-  text-align: center;
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.22em;
-  color: #e8c890;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
-}
-.vinyl-sleeve-title span {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 0.34em;
-  opacity: 0.7;
-  margin-top: 2px;
-}
-
-/* the record peeking out to the right of its sleeve */
-.vinyl-disc {
-  position: absolute;
-  left: 130px; top: 27px;
-  width: 216px; height: 216px;
-  border-radius: 50%;
-  background:
-    repeating-radial-gradient(circle at 50% 50%,
-      #07060a 0,
-      #07060a 1.2px,
-      #161217 1.2px,
-      #161217 2.4px),
-    radial-gradient(circle, #161217, #050309);
-  box-shadow:
-    0 6px 14px rgba(0,0,0,0.4),
-    inset 0 0 0 1px rgba(255,255,255,0.04);
-}
-.vinyl-shine {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.18) 0%,
-    rgba(255,255,255,0) 20%,
-    rgba(255,255,255,0) 55%,
-    rgba(255,255,255,0.08) 65%,
-    rgba(255,255,255,0) 80%);
-  pointer-events: none;
-}
-.vinyl-label {
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%);
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%,
-    #d4a04a 0%, #a8782a 50%, #6a4810 100%);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.4),
-              inset 0 -3px 4px rgba(0,0,0,0.2);
-  display: grid;
-  place-items: center;
-  z-index: 2;
-}
-.vinyl-label-text {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-weight: 600;
-  font-size: 11px;
-  color: #2a1810;
-  letter-spacing: 0.12em;
-}
-.vinyl-pin {
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 4px; height: 4px;
-  background: #0a0805;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-}
 
 /* ============================================================
    sound pill + bell flash
@@ -1393,8 +1146,7 @@ body.no-trinkets .trinket { display: none; }
 
 .letters-menu {
   position: absolute;
-  right: 80px;
-  top: 360px;       /* sit just below the letters trinket */
+  /* left/top set dynamically by JS to follow the dragged trinket */
   z-index: 60;
   display: flex;
   flex-direction: column;
@@ -1407,14 +1159,14 @@ body.no-trinkets .trinket { display: none; }
   box-shadow: 0 12px 32px rgba(0,0,0,0.35),
               0 2px 6px rgba(0,0,0,0.2);
   opacity: 0;
-  transform: translateY(-8px) scale(0.96);
+  transform: translateX(-50%) translateY(-8px) scale(0.96);
   transform-origin: top center;
   pointer-events: none;
   transition: opacity 200ms ease-out, transform 240ms cubic-bezier(.2,1.2,.4,1);
 }
 .letters-menu.show {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateX(-50%) translateY(0) scale(1);
   pointer-events: auto;
 }
 .letters-menu::before {
@@ -1472,6 +1224,13 @@ body.no-trinkets .trinket { display: none; }
   @page {
     size: A4;
     margin: 22mm 22mm 20mm 22mm;
+    background: #fbf3df;
+  }
+  /* force background colours — browsers suppress them by default */
+  html, body {
+    background: #fbf3df !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   /* hide everything */
   body * { visibility: hidden !important; }
@@ -1481,7 +1240,9 @@ body.no-trinkets .trinket { display: none; }
   .print-only {
     position: fixed !important;
     left: 0; top: 0; right: 0; bottom: 0;
-    background: #fbf3df;
+    background: #fbf3df !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
     padding: 24mm 28mm;
     margin: 0;
     color: #2a1f17;
