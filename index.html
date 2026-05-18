@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwood — A Typewriter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/json" id="seed-text">"Wednesday, October 14th — \n\nDear friend, \n\nI write to you from the desk by the window, where the afternoon light has gone the colour of weak tea. The kettle is on. The cat is asleep. \n\nGo on — press a key.    "</script>
+
+</head>
+<body>
+
+<div class="scene">
+  <div class="scene-inner" id="sceneInner">
+
+    <!-- ─── trinkets behind the typewriter ─────────────────────── -->
+
+    <div class="trinket trinket-latte" data-trinket="latte">
+      <div class="latte-straw"></div>
+      <div class="latte-lid">
+        <div class="latte-lid-rim"></div>
+      </div>
+      <div class="latte-cup">
+        <div class="latte-coffee"></div>
+        <div class="latte-shine"></div>
+        <div class="latte-sleeve">
+          <div class="latte-sleeve-text">café</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trinket trinket-letters" data-trinket="letters">
+      <div class="letter l-3"></div>
+      <div class="letter l-2"></div>
+      <div class="letter l-1">
+        <div class="letter-line"></div>
+        <div class="letter-stamp">
+          <span class="stamp-inner">8¢</span>
+        </div>
+        <div class="wax-seal"></div>
+      </div>
+    </div>
+
+    <div class="trinket trinket-plant" data-trinket="plant">
+      <div class="plant-leaves">
+        <div class="plant-leaf pl-1"></div>
+        <div class="plant-leaf pl-2"></div>
+        <div class="plant-leaf pl-3"></div>
+        <div class="plant-leaf pl-4"></div>
+        <div class="plant-leaf pl-5"></div>
+        <div class="plant-leaf pl-6"></div>
+        <div class="plant-leaf pl-7"></div>
+      </div>
+      <div class="plant-pot">
+        <div class="plant-pot-rim"></div>
+        <div class="plant-pot-shadow"></div>
+      </div>
+    </div>
+
+    <!-- ─── paper rising from the carriage ─────────────────────── -->
+
+    <div class="paper-stage" id="paperStage">
+      <div class="paper" id="paper">
+        <div class="paper-grain"></div>
+        <div class="paper-fold"></div>
+        <div class="paper-text-wrap">
+          <div class="paper-text" id="paperText"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── the typewriter ─────────────────────────────────────── -->
+
+    <div class="typewriter" id="typewriter">
+
+      <div class="carriage" id="carriage">
+        <div class="carriage-rail"></div>
+        <div class="platen">
+          <div class="platen-end left"></div>
+          <div class="platen-end right"></div>
+        </div>
+        <div class="paper-bail"><span></span><span></span></div>
+        <div class="return-lever"></div>
+        <div class="margin-knob left"></div>
+        <div class="margin-knob right"></div>
+      </div>
+
+      <div class="hood">
+        <div class="hood-shine"></div>
+        <div class="ribbon-window">
+          <div class="ribbon-shadow"></div>
+          <div class="typebars" id="typebars"></div>
+          <div class="ribbon-spool left"></div>
+          <div class="ribbon-spool right"></div>
+        </div>
+        <div class="brand-plate">UNDERWOOD</div>
+      </div>
+
+      <div class="keyboard">
+        <div class="row row-1">
+          <div class="key key-num" data-key="1"><span class="kt">!</span><span class="kb">1</span></div>
+          <div class="key key-num" data-key="2"><span class="kt">"</span><span class="kb">2</span></div>
+          <div class="key key-num" data-key="3"><span class="kt">#</span><span class="kb">3</span></div>
+          <div class="key key-num" data-key="4"><span class="kt">$</span><span class="kb">4</span></div>
+          <div class="key key-num" data-key="5"><span class="kt">%</span><span class="kb">5</span></div>
+          <div class="key key-num" data-key="6"><span class="kt">¢</span><span class="kb">6</span></div>
+          <div class="key key-num" data-key="7"><span class="kt">&amp;</span><span class="kb">7</span></div>
+          <div class="key key-num" data-key="8"><span class="kt">'</span><span class="kb">8</span></div>
+          <div class="key key-num" data-key="9"><span class="kt">(</span><span class="kb">9</span></div>
+          <div class="key key-num" data-key="0"><span class="kt">)</span><span class="kb">0</span></div>
+          <div class="key key-num" data-key="-"><span class="kt">_</span><span class="kb">-</span></div>
+          <div class="key key-num" data-key="="><span class="kt">+</span><span class="kb">=</span></div>
+        </div>
+        <div class="row row-2">
+          <div class="key key-fn" data-key="Tab"><span class="glyph">⇥</span></div>
+          <div class="key" data-key="q"><span class="kc">Q</span></div>
+          <div class="key" data-key="w"><span class="kc">W</span></div>
+          <div class="key" data-key="e"><span class="kc">E</span></div>
+          <div class="key" data-key="r"><span class="kc">R</span></div>
+          <div class="key" data-key="t"><span class="kc">T</span></div>
+          <div class="key" data-key="y"><span class="kc">Y</span></div>
+          <div class="key" data-key="u"><span class="kc">U</span></div>
+          <div class="key" data-key="i"><span class="kc">I</span></div>
+          <div class="key" data-key="o"><span class="kc">O</span></div>
+          <div class="key" data-key="p"><span class="kc">P</span></div>
+          <div class="key key-fn" data-key="Backspace"><span class="glyph">⌫</span></div>
+        </div>
+        <div class="row row-3">
+          <div class="key" data-key="a"><span class="kc">A</span></div>
+          <div class="key" data-key="s"><span class="kc">S</span></div>
+          <div class="key" data-key="d"><span class="kc">D</span></div>
+          <div class="key" data-key="f"><span class="kc">F</span></div>
+          <div class="key" data-key="g"><span class="kc">G</span></div>
+          <div class="key" data-key="h"><span class="kc">H</span></div>
+          <div class="key" data-key="j"><span class="kc">J</span></div>
+          <div class="key" data-key="k"><span class="kc">K</span></div>
+          <div class="key" data-key="l"><span class="kc">L</span></div>
+          <div class="key" data-key=";"><span class="kt">:</span><span class="kb">;</span></div>
+          <div class="key key-fn" data-key="Enter"><span class="glyph">↵</span></div>
+        </div>
+        <div class="row row-4">
+          <div class="key key-fn" data-key="Shift"><span class="glyph">⇧</span></div>
+          <div class="key" data-key="z"><span class="kc">Z</span></div>
+          <div class="key" data-key="x"><span class="kc">X</span></div>
+          <div class="key" data-key="c"><span class="kc">C</span></div>
+          <div class="key" data-key="v"><span class="kc">V</span></div>
+          <div class="key" data-key="b"><span class="kc">B</span></div>
+          <div class="key" data-key="n"><span class="kc">N</span></div>
+          <div class="key" data-key="m"><span class="kc">M</span></div>
+          <div class="key" data-key=","><span class="kt">,</span><span class="kb">,</span></div>
+          <div class="key" data-key="."><span class="kt">.</span><span class="kb">.</span></div>
+          <div class="key" data-key="/"><span class="kt">?</span><span class="kb">/</span></div>
+          <div class="key key-fn" data-key="ShiftR"><span class="glyph">⇧</span></div>
+        </div>
+      </div>
+
+      <div class="space-rail">
+        <div class="space-bar" data-key=" "></div>
+      </div>
+
+      <div class="body-shine"></div>
+      <div class="body-base"></div>
+
+    </div>
+
+    <!-- ─── trinkets in front ──────────────────────────────────── -->
+
+    <div class="trinket trinket-vinyl" data-trinket="vinyl">
+      <div class="vinyl-sleeve">
+        <div class="vinyl-sleeve-art"></div>
+        <div class="vinyl-sleeve-band"></div>
+        <div class="vinyl-sleeve-title">NOCTURNES <span>Op.&nbsp;9</span></div>
+      </div>
+      <div class="vinyl-disc">
+        <div class="vinyl-shine"></div>
+        <div class="vinyl-label">
+          <div class="vinyl-label-text">SIDE&nbsp;A</div>
+        </div>
+        <div class="vinyl-pin"></div>
+      </div>
+    </div>
+
+    <div class="trinket trinket-books" data-trinket="books">
+      <div class="book book-4">
+        <div class="book-band"></div>
+        <div class="book-pages-side"></div>
+      </div>
+      <div class="book book-3">
+        <div class="book-band"></div>
+        <div class="book-spine-title">Histoire</div>
+        <div class="book-pages-side"></div>
+      </div>
+      <div class="book book-2">
+        <div class="book-band"></div>
+        <div class="book-spine-title">Poèmes</div>
+        <div class="book-pages-side"></div>
+      </div>
+      <div class="book book-1">
+        <div class="book-band"></div>
+        <div class="book-spine-title">Lettres</div>
+        <div class="book-floret"></div>
+        <div class="book-pages-side"></div>
+      </div>
+    </div>
+
+    <div class="trinket trinket-matches" data-trinket="matches">
+      <div class="match-sticks">
+        <span class="match m1"><i></i></span>
+        <span class="match m2"><i></i></span>
+        <span class="match m3"><i></i></span>
+        <span class="match m4"><i></i></span>
+        <span class="match m5"><i></i></span>
+      </div>
+      <div class="matchbook">
+        <div class="matchbook-crest"></div>
+        <div class="matchbook-title">RAFFLES</div>
+        <div class="matchbook-sub">HOTEL</div>
+        <div class="matchbook-quote">singapore</div>
+      </div>
+    </div>
+
+    <!-- sound toggle pill in corner -->
+    <button class="sound-pill" id="soundPill" aria-label="Toggle sound" title="Toggle sound">
+      <span class="sp-icon" id="spIcon">♪</span>
+      <span class="sp-label" id="spLabel">sound on</span>
+    </button>
+
+    <!-- letters action menu — appears on hover of the letters trinket -->
+    <div class="letters-menu" id="lettersMenu" aria-hidden="true">
+      <button class="lm-btn" id="lmSend" type="button">
+        <span class="lm-icon">✉</span>
+        <span class="lm-label">send to a friend</span>
+      </button>
+      <button class="lm-btn" id="lmPdf" type="button">
+        <span class="lm-icon">↓</span>
+        <span class="lm-label">save as PDF</span>
+      </button>
+    </div>
+
+    <!-- ding indicator (carriage bell) -->
+    <div class="bell-flash" id="bellFlash"></div>
+
+  </div>
+</div>
+
+<!-- ─── envelope overlay (outside scaled scene so we control its
+       own animation independent of the desk scaling) ────────────── -->
+
+<div class="env-overlay" id="envOverlay" aria-hidden="true">
+  <div class="env-backdrop" id="envBackdrop"></div>
+
+  <div class="env-stage">
+    <div class="envelope" id="envelope">
+
+      <!-- back-flap visible while the envelope is open -->
+      <div class="env-flap-back"></div>
+
+      <!-- airmail-bordered front face -->
+      <div class="env-front">
+
+        <!-- monogram in the upper-left corner -->
+        <div class="env-monogram">
+          <span>via</span> AIR MAIL
+        </div>
+
+        <!-- the stamp in the upper-right -->
+        <div class="env-stamp">
+          <div class="env-stamp-art">
+            <div class="env-stamp-wreath"></div>
+            <div class="env-stamp-glyph">✉</div>
+          </div>
+          <div class="env-stamp-amount">5¢</div>
+          <div class="env-stamp-text">POSTE</div>
+        </div>
+
+        <!-- a hand-cancelled postmark over the stamp -->
+        <div class="env-postmark">
+          <div class="env-postmark-text">
+            <span>POSTED</span>
+            <span class="env-postmark-date" id="envPostmarkDate"></span>
+          </div>
+        </div>
+
+        <!-- address lines -->
+        <div class="env-address">
+          <div class="env-row">
+            <span class="env-prefix">To</span>
+            <input class="env-input env-input-name" id="envName"
+                   type="text" placeholder="Their name"
+                   autocomplete="off" spellcheck="false">
+          </div>
+          <div class="env-row">
+            <span class="env-prefix env-prefix-sm">at</span>
+            <input class="env-input env-input-email" id="envEmail"
+                   type="email" placeholder="their@address.com"
+                   autocomplete="off" spellcheck="false">
+          </div>
+          <div class="env-row env-row-small">
+            <span class="env-prefix env-prefix-sm">from</span>
+            <input class="env-input env-input-from" id="envFrom"
+                   type="text" placeholder="Your name (optional)"
+                   autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <!-- subtle handwritten flourish under the address -->
+        <div class="env-flourish">~ ~ ~</div>
+
+      </div>
+
+      <!-- top flap that closes when sealed -->
+      <div class="env-flap-top">
+        <div class="env-flap-top-inner"></div>
+      </div>
+
+      <!-- wax seal that stamps down when sending -->
+      <div class="env-wax" id="envWax">
+        <span>U</span>
+      </div>
+
+    </div>
+
+    <!-- actions live below the envelope -->
+    <div class="env-actions">
+      <button class="env-btn env-btn-cancel" id="envCancel">cancel</button>
+      <button class="env-btn env-btn-send" id="envSend" disabled>
+        <span class="env-btn-icon">✐</span>
+        post the letter
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="tweaksRoot"></div>
+
+<!-- hidden printable letter (only visible during print/PDF export) -->
+<div class="print-only" id="printLetter" aria-hidden="true">
+  <div class="print-header">
+    <div class="print-date" id="printDate"></div>
+    <div class="print-monogram">~ Underwood ~</div>
+  </div>
+  <pre class="print-body" id="printBody"></pre>
+  <div class="print-footer">— typed on a typewriter</div>
+</div>
+
+<!-- React for tweaks panel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="tweaks-app.jsx"></script>
+
+<script src="typewriter.js"></script>
+
+</body>
+</html>
