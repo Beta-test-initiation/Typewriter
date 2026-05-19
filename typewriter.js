@@ -10,60 +10,8 @@
 (function () {
   'use strict';
 
-  // ─── email config (values come from config.js, which is gitignored) ──
-  const _cfg              = window.TYPEWRITER_CONFIG || {};
-  const EMAILJS_PUBLIC_KEY  = _cfg.EMAILJS_PUBLIC_KEY  || '';
-  const EMAILJS_SERVICE_ID  = _cfg.EMAILJS_SERVICE_ID  || '';
-  const EMAILJS_TEMPLATE_ID = _cfg.EMAILJS_TEMPLATE_ID || '';
-  const SITE_URL            = _cfg.SITE_URL            || '';
-
-  const EMAILJS_READY = (
-    typeof emailjs !== 'undefined' &&
-    EMAILJS_PUBLIC_KEY !== '' &&
-    EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY'
-  );
-  if (EMAILJS_READY) emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-  // ─── build a beautiful HTML letter email ──────────────────
-  function buildHtmlEmail(name, text, from, dateStr) {
-    const esc = (s) => String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const bodyHtml = esc(text).replace(/\n/g, '<br>');
-    const fromRow  = from
-      ? `<tr><td style="padding:0 48px 24px;font-family:'Courier New',Courier,monospace;font-size:14px;color:#2a1f17;">&#x2014;&nbsp;${esc(from)}</td></tr>`
-      : '';
-    const promoUrl     = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL') ? SITE_URL : '#';
-    const promoDisplay = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL')
-      ? SITE_URL.replace(/^https?:\/\//, '')
-      : 'underwood — a typewriter';
-    const promoRow = `<tr><td style="padding:10px 48px 24px;border-top:1px solid rgba(100,70,30,0.1);text-align:center;">
-           <p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:10px;color:rgba(80,55,20,0.4);letter-spacing:0.05em;">
-             write your own letter at
-             <a href="${promoUrl}" style="color:#7a5a2a;text-decoration:none;">${promoDisplay}</a>
-           </p></td></tr>`;
-
-    return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#ede4c8;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ede4c8;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#fbf3df;border:1px solid #d8cc9e;max-width:600px;box-shadow:0 4px 28px rgba(0,0,0,0.12);">
-  <tr><td style="padding:36px 48px 16px;border-bottom:1px solid rgba(100,70,30,0.18);">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="font-family:Georgia,serif;font-style:italic;color:#7a5a2a;font-size:14px;">${esc(dateStr)}</td>
-      <td align="right" style="font-family:Georgia,serif;font-style:italic;color:rgba(80,55,20,0.4);font-size:12px;letter-spacing:0.18em;">~ Underwood ~</td>
-    </tr></table>
-  </td></tr>
-  <tr><td style="padding:32px 48px 8px;font-family:'Courier New',Courier,monospace;font-size:14px;line-height:1.9;color:#2a1f17;">${bodyHtml}</td></tr>
-  ${fromRow}
-  <tr><td style="padding:12px 48px 20px;border-top:1px solid rgba(100,70,30,0.15);">
-    <p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:11px;color:rgba(80,55,20,0.5);text-align:right;">&#x2014;&nbsp;typed on a typewriter</p>
-  </td></tr>
-  ${promoRow}
-</table>
-</td></tr></table>
-</body></html>`;
-  }
+  // ─── site config (from config.js, which is gitignored) ───────
+  const SITE_URL = (window.TYPEWRITER_CONFIG || {}).SITE_URL || '';
 
   // ─── fit scene to viewport ────────────────────────────────
   const DESIGN_W = 1280, DESIGN_H = 820;
@@ -603,7 +551,22 @@
     //   T+900 : envelope flies — fire the send here
     //   T+2200: close overlay, show result toast
 
-    let sendPromise = null;
+    // build a beautifully formatted plain-text letter for mailto
+    const divider = '— — — — — — — — — — — — — — — — — — — —';
+    const promoLine = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL')
+      ? `\nwrite your own at ${SITE_URL}`
+      : '\nwrite your own at underwood — a typewriter';
+    const letterBody =
+      `${dateStr}\n\n` +
+      (toName ? `Dear ${toName},\n\n` : '') +
+      text +
+      (from ? `\n\n— ${from}` : '') +
+      `\n\n\n${divider}\ntyped on a typewriter${promoLine}\n${divider}`;
+
+    const mailtoUrl =
+      `mailto:${encodeURIComponent(to)}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(letterBody)}`;
 
     envelope.classList.add('sealing');
     setTimeout(() => { envelope.classList.add('sealed'); }, 460);
@@ -611,32 +574,11 @@
     setTimeout(() => {
       envOverlay.classList.add('posting');
       envelope.classList.add('flying');
-
-      if (EMAILJS_READY) {
-        sendPromise = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          to_email:     to,
-          to_name:      toName || 'friend',
-          from_name:    from   || 'a friend with a typewriter',
-          subject:      subject,
-          message_html: buildHtmlEmail(toName, text, from, dateStr),
-        });
-      } else {
-        // EmailJS not configured — fall back to mailto
-        const plainBody =
-          (toName ? `Dear ${toName},\n\n` : '') +
-          text +
-          (from ? `\n\n— ${from}` : '') +
-          '\n\n(typed on a typewriter)';
-        const mailtoUrl =
-          `mailto:${encodeURIComponent(to)}` +
-          `?subject=${encodeURIComponent(subject)}` +
-          `&body=${encodeURIComponent(plainBody)}`;
-        sendPromise = new Promise((resolve) => {
-          try { const w = window.open(mailtoUrl, '_blank'); if (!w) window.location.href = mailtoUrl; }
-          catch (e) { window.location.href = mailtoUrl; }
-          resolve();
-        });
-      }
+      // download the formatted PDF letter
+      buildPDF(text, from, dateStr).save('my-letter.pdf');
+      // open mail app pre-filled so user can attach and send
+      try { const w = window.open(mailtoUrl, '_blank'); if (!w) window.location.href = mailtoUrl; }
+      catch (e) { window.location.href = mailtoUrl; }
     }, 900);
 
     setTimeout(() => {
@@ -645,13 +587,7 @@
       envName.value = '';
       envEmail.value = '';
       updateSendDisabled();
-      if (sendPromise) {
-        sendPromise
-          .then(() => showToast(`posted to ${to} ✉`))
-          .catch(() => showToast('could not send — please try again'));
-      } else {
-        showToast(`posted to ${to} ✉`);
-      }
+      showToast(`letter downloaded — attach it to the email that just opened ✉`);
     }, 2200);
   }
 
@@ -721,7 +657,86 @@
     });
   }
 
-  // ─── PDF export via the browser print dialog ──────────────
+  // ─── shared PDF builder (used by both export and send) ───────
+
+  function buildPDF(text, from, dateStr) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, H = 297, ml = 24, mr = 24, mt = 26;
+    const contentW = W - ml - mr;
+    let y = mt;
+
+    // parchment background
+    doc.setFillColor(251, 243, 223);
+    doc.rect(0, 0, W, H, 'F');
+
+    // date — warm brown italic
+    doc.setFont('times', 'italic');
+    doc.setFontSize(13);
+    doc.setTextColor(106, 79, 42);
+    doc.text(dateStr, ml, y);
+
+    // monogram — faded right-aligned
+    doc.setTextColor(160, 144, 118);
+    doc.text('~ Underwood ~', W - mr, y, { align: 'right' });
+    y += 6;
+
+    // header rule
+    doc.setDrawColor(185, 165, 135);
+    doc.setLineWidth(0.25);
+    doc.line(ml, y, W - mr, y);
+    y += 9;
+
+    // body — courier, dark ink
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(42, 31, 23);
+
+    const paragraphs = text.split(/\r?\n/);
+    for (const para of paragraphs) {
+      if (para.trim() === '') {
+        y += 5;
+      } else {
+        const wrapped = doc.splitTextToSize(para, contentW);
+        if (y + wrapped.length * 6 > H - 36) {
+          doc.addPage();
+          doc.setFillColor(251, 243, 223);
+          doc.rect(0, 0, W, H, 'F');
+          y = mt;
+        }
+        doc.text(wrapped, ml, y);
+        y += wrapped.length * 6;
+      }
+    }
+
+    // signature
+    if (from) {
+      y += 7;
+      if (y > H - 36) { doc.addPage(); doc.setFillColor(251,243,223); doc.rect(0,0,W,H,'F'); y = mt; }
+      doc.text(`— ${from}`, ml, y);
+    }
+
+    // footer — right-aligned italic
+    doc.setFont('times', 'italic');
+    doc.setFontSize(10);
+    doc.setTextColor(160, 144, 118);
+    doc.text('— typed on a typewriter', W - mr, H - 18, { align: 'right' });
+
+    // promo strip
+    doc.setDrawColor(200, 182, 152);
+    doc.setLineWidth(0.2);
+    doc.line(ml, H - 13, W - mr, H - 13);
+    const promoText = (SITE_URL && SITE_URL !== 'YOUR_SITE_URL')
+      ? `write your own letter at ${SITE_URL.replace(/^https?:\/\//, '')}`
+      : 'write your own letter at underwood — a typewriter';
+    doc.setFontSize(8.5);
+    doc.setTextColor(170, 150, 120);
+    doc.text(promoText, W / 2, H - 8, { align: 'center' });
+
+    return doc;
+  }
+
+  // ─── save as PDF (letters trinket button) ─────────────────
 
   function exportPDF() {
     const text = (window.__typewriter.getLetterText() || '').trim();
@@ -729,16 +744,7 @@
                     'August','September','October','November','December'];
     const d = new Date();
     const dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-
-    const printBody = document.getElementById('printBody');
-    const printDate = document.getElementById('printDate');
-    if (printBody) printBody.textContent = text || '(an empty page)';
-    if (printDate) printDate.textContent = dateStr;
-
-    // a frame to ensure DOM is committed before print
-    requestAnimationFrame(() => {
-      setTimeout(() => window.print(), 30);
-    });
+    buildPDF(text, '', dateStr).save('my-letter.pdf');
   }
 
 })();

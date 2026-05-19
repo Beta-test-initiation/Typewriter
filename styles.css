@@ -1287,4 +1287,15 @@ body.no-trinkets .trinket { display: none; }
     text-align: right;
     letter-spacing: 0.08em;
   }
+  .print-promo {
+    margin-top: 48pt;
+    padding-top: 10pt;
+    border-top: 1px solid rgba(60,40,22,0.18);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 10pt;
+    color: rgba(60,40,22,0.4);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
 }
